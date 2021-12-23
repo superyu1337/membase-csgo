@@ -31,8 +31,8 @@ pub fn run<'a>(ctx: &'a mut CheatCtx) {
             };
 
             let occlusion = GlowObjectOcclusion {
-                render_when_occluded: false,
-                render_when_unoccluded: true,
+                render_when_occluded: true,
+                render_when_unoccluded: false,
             };
 
 
