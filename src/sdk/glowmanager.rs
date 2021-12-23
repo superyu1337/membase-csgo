@@ -1,0 +1,17 @@
+use memflow::{Address, VirtualMemory};
+
+use crate::core::structs::CheatCtx;
+
+pub struct GlowManager {
+    pub ptr: Address
+}
+
+impl GlowManager {
+    pub fn get(ctx: &mut CheatCtx) -> GlowManager {
+        let offset = ctx.offsets["dwGlowObjectManager"];
+        let ptr = ctx.process.virt_mem.virt_read_addr32(ctx.client_module.base + offset)
+            .unwrap();
+
+        return GlowManager { ptr };
+    }
+}
