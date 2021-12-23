@@ -1,5 +1,6 @@
-use crate::core::structs::PlayerData;
-use std::{net::TcpListener};
+use std::net::TcpListener;
+
+//use crate::core::structs::PlayerData;
 
 use crate::core::structs::ThreadMsg;
 
@@ -13,10 +14,10 @@ mod core;
 mod features;
 
 fn main() {
-    let _ = SimpleLogger::init(log::LevelFilter::Debug, simplelog::Config::default());
+    let _ = SimpleLogger::init(log::LevelFilter::Info, simplelog::Config::default());
 
     let mut cfg = core::structs::Config {
-        glow: 0,
+        glow: true,
     };
 
     let mut ctx = unsafe { core::setup(cfg)}
@@ -24,10 +25,48 @@ fn main() {
 
     let (socket_tx, cheat_rx) = std::sync::mpsc::channel();
 
-    // Websocket thread
-    let _websocket_thread = std::thread::spawn(move || {
-        // shitty loop here
 
+    let cheat_thread = std::thread::spawn(move || {
+        let mut last_tick = 0;
+        let mut average_execution_time: u128 = 0;
+
+        loop {
+            let start_instant = std::time::Instant::now();
+            let global_vars = sdk::engine::get_globalvars(&mut ctx);
+            //let playerdata_array: Option<[PlayerData; 64]> = None;
+
+            if global_vars.tickcount > last_tick {
+                // Run your features here
+
+                if cfg.glow {
+                    features::glow::run(&mut ctx);
+                }
+            } else {
+                let response = cheat_rx.try_recv();
+
+                if response.is_ok() {
+                    let thread_msg: ThreadMsg = response.unwrap();
+
+                    if thread_msg.exited {
+                        break;
+                    }
+
+                    cfg = thread_msg.new_config.unwrap();
+                }
+            }
+
+            last_tick = global_vars.tickcount;
+
+            let end_instant = std::time::Instant::now();
+            let execution_time = end_instant.duration_since(start_instant);
+            average_execution_time += execution_time.as_nanos();
+            average_execution_time /= 2;
+        }
+        info!("Average execution time: {} nanoseconds", average_execution_time);
+    });
+
+    // Websocket thread
+    let websocket_thread = std::thread::spawn(move || {
         let server = TcpListener::bind("0.0.0.0:42069").expect("Bingind WebSocket");
         for stream in server.incoming() {
 
@@ -50,12 +89,13 @@ fn main() {
                         0x01 => {
                             msg_content.remove(0);
                             let new_config = core::structs::Config {
-                                    glow: msg_content[0]
+                                    glow: msg_content[0] != 0
                             };
 
                             tx.send(ThreadMsg {
-                                new_config,
-                                playerdata_array: [PlayerData::new_invalid(); 64]
+                                exited: false,
+                                new_config: Some(new_config),
+                                playerdata_array: None
                             }).expect("Sending message to cheat thread");
                         },
                         _ => {
@@ -65,29 +105,8 @@ fn main() {
                 }
             });
         }
-
     });
 
-    let mut last_tick = 0;
-
-    loop {
-        let global_vars = sdk::engine::get_globalvars(&mut ctx);
-        let _playerdata_array = [PlayerData::new_invalid(); 64];
-
-        if global_vars.tickcount > last_tick {
-            // run your cheat stuff
-            if cfg.glow == 1 {
-                features::glow::run(&mut ctx);
-            }
-        } else {
-            let response = cheat_rx.recv_timeout(std::time::Duration::from_millis(1));
-
-            if response.is_ok() {
-                let thread_msg: ThreadMsg = response.unwrap();
-                cfg = thread_msg.new_config;
-            }
-        }
-
-        last_tick = global_vars.tickcount;
-    }
+    cheat_thread.join().unwrap();
+    websocket_thread.join().unwrap();
 }

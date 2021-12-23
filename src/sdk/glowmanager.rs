@@ -7,7 +7,7 @@ pub struct GlowManager {
 }
 
 impl GlowManager {
-    pub fn get(ctx: &mut CheatCtx) -> GlowManager {
+    pub fn get<'a>(ctx: &'a mut CheatCtx) -> GlowManager {
         let offset = ctx.offsets["dwGlowObjectManager"];
         let ptr = ctx.process.virt_mem.virt_read_addr32(ctx.client_module.base + offset)
             .unwrap();

@@ -36,15 +36,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
-name = "bincode"
-version = "1.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f45e9417d87227c7a56d22e471c6206462cba514c7590c09aff4cf6d1ddcad"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "bit_field"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -459,13 +450,11 @@ checksum = "a3e378b66a060d48947b590737b30a1be76706c8dd7b8ba0f2fe3989c68a853f"
 name = "membase-csgo"
 version = "0.1.0"
 dependencies = [
- "bincode",
  "dataview",
  "libm",
  "log",
  "memflow",
  "memflow-win32",
- "serde",
  "simplelog",
  "toml",
  "tungstenite",
@@ -1086,9 +1075,9 @@ dependencies = [
 
 [[package]]
 name = "tungstenite"
-version = "0.16.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ad3713a14ae247f22a728a0456a545df14acf3867f905adff84be99e23b3ad1"
+checksum = "a0b2d8558abd2e276b0a8df5c05a2ec762609344191e5fd23e292c910e9165b5"
 dependencies = [
  "base64",
  "byteorder",

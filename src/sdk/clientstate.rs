@@ -9,7 +9,7 @@ pub struct ClientState {
 }
 
 impl ClientState {
-    pub fn get(ctx: &mut CheatCtx) -> ClientState {
+    pub fn get<'a>(ctx: &'a mut CheatCtx) -> ClientState {
         let offset = ctx.offsets["dwClientState"];
         let ptr = ctx.process.virt_mem.virt_read_addr32(ctx.engine_module.base + offset)
             .unwrap();
@@ -17,19 +17,19 @@ impl ClientState {
         return ClientState { ptr };
     }
 
-    pub fn get_viewangles(&self, ctx: &mut CheatCtx) -> Vec3 {
+    pub fn get_viewangles<'a>(&self, ctx: &'a mut CheatCtx) -> Vec3 {
         let offset = ctx.offsets["dwClientState_ViewAngles"];
         ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap()
     }
 
-    pub fn set_viewangles(&self, ctx: &mut CheatCtx, newangles: Vec3) {
+    pub fn set_viewangles<'a>(&self, ctx: &'a mut CheatCtx, newangles: Vec3) {
         let offset = ctx.offsets["dwClientState_ViewAngles"];
         ctx.process.virt_mem.virt_write(self.ptr + offset, &newangles)
             .unwrap();
     }
 
-    pub fn get_userinfo_table(&self, ctx: &mut CheatCtx, index: usize) -> PlayerInfo {
+    pub fn get_userinfo_table<'a>(&self, ctx: &'a mut CheatCtx, index: usize) -> PlayerInfo {
         let offset = ctx.offsets["dwClientState_PlayerInfo"];
         let userinfotable_ptr = ctx.process.virt_mem.virt_read_addr32(self.ptr + offset)
             .unwrap();

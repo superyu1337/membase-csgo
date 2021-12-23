@@ -1,23 +1,21 @@
 use std::collections::HashMap;
 
-use dataview::Pod;
-use memflow::{VirtualDMA, ConnectorInstance, DirectTranslate};
-use memflow_win32::{Win32Process, Win32VirtualTranslate, Win32ModuleInfo};
+use memflow::{VirtualDMA, ConnectorInstance, DirectTranslate, CachedMemoryAccess, TimedCacheValidator, CachedVirtualTranslate};
+use memflow_win32::{Win32Process, Win32ModuleInfo, Win32VirtualTranslate};
 
 use crate::sdk::structs::vec3::Vec3;
 
-pub struct CheatCtx {
-    pub process: Win32Process<VirtualDMA<ConnectorInstance, DirectTranslate, Win32VirtualTranslate>>,
+pub struct CheatCtx<'a> {
+    pub process: Win32Process<VirtualDMA<CachedMemoryAccess<'a, ConnectorInstance, TimedCacheValidator>, CachedVirtualTranslate<DirectTranslate, TimedCacheValidator>, Win32VirtualTranslate>>,
     pub engine_module: Win32ModuleInfo,
     pub client_module: Win32ModuleInfo,
     pub offsets: HashMap<String, usize>,
     pub config: Config,
 }
 
-#[derive(Pod, Clone, Copy)]
-#[repr(C)]
+#[derive(Clone, Copy)]
 pub struct Config {
-    pub glow: u8,
+    pub glow: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -29,20 +27,9 @@ pub struct PlayerData {
     pub team: i32
 }
 
-impl PlayerData {
-    pub fn new_invalid() -> PlayerData {
-        PlayerData {
-            name: ['0'; 128],
-            rank: -1,
-            rank_name: ['0'; 32],
-            pos: Vec3::new(0.0, 0.0, 0.0),
-            team: -1,
-        }
-    }
-}
-
 #[derive(Clone, Copy)]
 pub struct ThreadMsg {
-    pub new_config: Config,
-    pub playerdata_array: [PlayerData; 64]
+    pub exited: bool,
+    pub new_config: Option<Config>,
+    pub playerdata_array: Option<[PlayerData; 64]>
 }
