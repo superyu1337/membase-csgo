@@ -3,4 +3,4 @@
 - Add convar manager.
 - Add shellcode injection.
 - Add more stuff.
-- Add egui based menu instead of websocket based API.
+- Properly implement websocket based API.
