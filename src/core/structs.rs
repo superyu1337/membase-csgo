@@ -1,15 +1,14 @@
-use std::collections::HashMap;
-
 use memflow::{VirtualDMA, ConnectorInstance, DirectTranslate, CachedMemoryAccess, TimedCacheValidator, CachedVirtualTranslate};
 use memflow_win32::{Win32Process, Win32ModuleInfo, Win32VirtualTranslate};
 
 use crate::sdk::structs::vec3::Vec3;
+use crate::core::offset_manager::OffsetManagerOutput;
 
 pub struct CheatCtx<'a> {
     pub process: Win32Process<VirtualDMA<CachedMemoryAccess<'a, ConnectorInstance, TimedCacheValidator>, CachedVirtualTranslate<DirectTranslate, TimedCacheValidator>, Win32VirtualTranslate>>,
     pub engine_module: Win32ModuleInfo,
     pub client_module: Win32ModuleInfo,
-    pub offsets: HashMap<String, usize>,
+    pub offsets: OffsetManagerOutput,
     pub config: Config,
 }
 

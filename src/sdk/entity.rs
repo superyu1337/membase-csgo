@@ -10,7 +10,7 @@ pub struct Entity {
 
 impl Entity {
     pub fn from_index<'a>(ctx: &'a mut CheatCtx, index: usize) -> Entity {
-        let offset = ctx.offsets["dwEntityList"];
+        let offset = ctx.offsets.sigs["dwEntityList"];
         let ptr = ctx.process.virt_mem.virt_read_addr32(ctx.client_module.base + offset + (index * 0x10))
             .expect(&format!("Read entity id {}", index));
 
@@ -18,7 +18,7 @@ impl Entity {
     }
 
     pub fn get_local<'a>(ctx: &'a mut CheatCtx) -> Entity {
-        let offset = ctx.offsets["dwLocalPlayer"];
+        let offset = ctx.offsets.sigs["dwLocalPlayer"];
         let ptr = ctx.process.virt_mem.virt_read_addr32(ctx.client_module.base + offset)
             .unwrap();
 
@@ -34,19 +34,19 @@ impl Entity {
     }
 
     pub fn get_health<'a>(&self, ctx: &'a mut CheatCtx) -> i32 {
-        let offset = ctx.offsets["m_iHealth"];
+        let offset = ctx.offsets.netvars["m_iHealth"];
         ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap()
     }
 
     pub fn get_team<'a>(&self, ctx: &'a mut CheatCtx) -> i32 {
-        let offset = ctx.offsets["m_iTeamNum"];
+        let offset = ctx.offsets.netvars["m_iTeamNum"];
         ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap()
     }
 
     pub fn get_dormant<'a>(&self, ctx: &'a mut CheatCtx) -> bool {
-        let offset = ctx.offsets["m_bDormant"];
+        let offset = ctx.offsets.netvars["m_bDormant"];
         let data: u8 = ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap();
 
@@ -54,7 +54,7 @@ impl Entity {
     }
 
     pub fn get_glowindex<'a>(&self, ctx: &'a mut CheatCtx) -> usize {
-        let offset = ctx.offsets["m_iGlowIndex"];
+        let offset = ctx.offsets.netvars["m_iGlowIndex"];
         let data: i32 = ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap();
 
@@ -62,25 +62,25 @@ impl Entity {
     }
 
     pub fn get_pos<'a>(&self, ctx: &'a mut CheatCtx) -> Vec3 {
-        let offset = ctx.offsets["m_vecOrigin"];
+        let offset = ctx.offsets.netvars["m_vecOrigin"];
         ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap()
     }
 
     pub fn get_viewoffset<'a>(&self, ctx: &'a mut CheatCtx) -> Vec3 {
-        let offset = ctx.offsets["m_vecViewOffset"];
+        let offset = ctx.offsets.netvars["m_vecViewOffset"];
         ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap()
     }
 
     pub fn get_aimpunch<'a>(&self, ctx: &'a mut CheatCtx) -> Vec3 {
-        let offset = ctx.offsets["m_aimPunchAngle"];
+        let offset = ctx.offsets.netvars["m_aimPunchAngle"];
         ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap()
     }
 
     pub fn get_spotted<'a>(&self, ctx: &'a mut CheatCtx) -> bool {
-        let offset = ctx.offsets["m_bSpotted"];
+        let offset = ctx.offsets.netvars["m_bSpotted"];
         let data: u8 = ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap();
 
@@ -88,19 +88,19 @@ impl Entity {
     }
 
     pub fn set_spotted<'a>(&self, ctx: &'a mut CheatCtx, value: bool) {
-        let offset = ctx.offsets["m_bSpotted"];
+        let offset = ctx.offsets.netvars["m_bSpotted"];
         ctx.process.virt_mem.virt_write(self.ptr + offset, &(value as u8))
             .unwrap();
     }
 
     pub fn get_spotted_mask<'a>(&self, ctx: &'a mut CheatCtx) -> i32 {
-        let offset = ctx.offsets["m_bSpottedByMask"];
+        let offset = ctx.offsets.netvars["m_bSpottedByMask"];
         ctx.process.virt_mem.virt_read(self.ptr + offset)
             .unwrap()
     }
 
     pub fn get_bonematrix_ptr<'a>(&self, ctx: &'a mut CheatCtx) -> Address {
-        let offset = ctx.offsets["m_dwBoneMatrix"];
+        let offset = ctx.offsets.netvars["m_dwBoneMatrix"];
         ctx.process.virt_mem.virt_read_addr32(self.ptr + offset)
             .unwrap()
     }
@@ -114,13 +114,13 @@ impl Entity {
     }
 
     pub fn get_comp_rank<'a>(&self, ctx: &'a mut CheatCtx, player_resources: Address) -> i32 {
-        let offset = ctx.offsets["m_iCompetitiveRanking"];
+        let offset = ctx.offsets.netvars["m_iCompetitiveRanking"];
         ctx.process.virt_mem.virt_read(player_resources + offset + (self.index * 0x4))
             .unwrap()
     }
 
     pub fn get_comp_wins<'a>(&self, ctx: &'a mut CheatCtx, player_resources: Address) -> i32 {
-        let offset = ctx.offsets["m_iCompetitiveWins"];
+        let offset = ctx.offsets.netvars["m_iCompetitiveWins"];
         ctx.process.virt_mem.virt_read(player_resources + offset + (self.index * 0x4))
             .unwrap()
     }

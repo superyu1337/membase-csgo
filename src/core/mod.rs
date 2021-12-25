@@ -1,14 +1,10 @@
-pub mod offset_manager;
 pub mod structs;
+mod offset_manager;
 
 use memflow::{ConnectorInventory, ConnectorArgs};
 use memflow_win32::{Win32Process, Kernel, Error};
 
 pub unsafe fn setup<'a>(config: structs::Config) -> Result<structs::CheatCtx<'a>, Error> {
-    let offsets = self::offset_manager::get_offsets();
-
-    info!("Parsed offsets");
-
     let inventory = ConnectorInventory::scan();
     let connector = inventory.create_connector(
         "qemu_procfs", &ConnectorArgs::default()
@@ -38,6 +34,10 @@ pub unsafe fn setup<'a>(config: structs::Config) -> Result<structs::CheatCtx<'a>
         .ok_or(Error::Other("Could not find the engine module!")).unwrap();
 
     info!("Found engine module - addr: {}", engine_module.base);
+
+    let offsets = offset_manager::run_scan(&mut process);
+    info!("Parsed offsets");
+
 
     return Ok(structs::CheatCtx {
         process,
