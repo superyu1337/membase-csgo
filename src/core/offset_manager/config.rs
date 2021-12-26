@@ -9,9 +9,6 @@ pub enum ConfigError {
     LoadingFromFile,
 }
 
-pub type Result<T> = ::std::result::Result<T, ConfigError>;
-
-
 // This struct represents a signature.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Signature {
@@ -108,7 +105,7 @@ impl Default for Config {
 }
 
 impl Config {
-    pub fn load(path: &str) -> Result<Self> {
+    pub fn load(path: &str) -> std::result::Result<Self, ConfigError> {
         let mut file_input = File::open(path).map_err(|_| ConfigError::LoadingFromFile)?;
         serde_json::from_reader(&mut file_input).map_err(|_| ConfigError::LoadingFromFile)
     }

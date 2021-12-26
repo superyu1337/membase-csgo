@@ -1,7 +1,4 @@
-use std::net::TcpListener;
-
-//use crate::core::structs::PlayerData;
-
+use crate::core::structs::PlayerData;
 use crate::core::structs::ThreadMsg;
 
 use simplelog::SimpleLogger;
@@ -12,101 +9,66 @@ extern crate simplelog;
 mod sdk;
 mod core;
 mod features;
+mod menu;
 
 fn main() {
     let _ = SimpleLogger::init(log::LevelFilter::Info, simplelog::Config::default());
+    let (cheat_tx, menu_rx) = std::sync::mpsc::channel();
+    let (menu_tx, cheat_rx) = std::sync::mpsc::channel();
 
-    let mut cfg = core::structs::Config {
-        glow: true,
-    };
+    let mut cfg = core::structs::Config::default();
 
+    // Initialize the cheat context. Gathers csgo process, modules and runs offset and netvar scans.
     let mut ctx = unsafe { core::setup(cfg)}
         .unwrap();
-
-    let (socket_tx, cheat_rx) = std::sync::mpsc::channel();
-
 
     let cheat_thread = std::thread::spawn(move || {
         let mut last_tick = 0;
         let mut average_execution_time: u128 = 0;
-
+    
         loop {
             let start_instant = std::time::Instant::now();
             let global_vars = sdk::engine::get_globalvars(&mut ctx);
-            //let playerdata_array: Option<[PlayerData; 64]> = None;
-
+            let playerdata_array: [Option<PlayerData>; 64] = [None; 64];
+    
             if global_vars.tickcount > last_tick {
                 // Run your features here
-
+    
                 if cfg.glow {
                     features::glow::run(&mut ctx);
                 }
             } else {
                 let response = cheat_rx.try_recv();
-
                 if response.is_ok() {
-                    let thread_msg: ThreadMsg = response.unwrap();
+                    let msg: ThreadMsg = response.unwrap();
 
-                    if thread_msg.exited {
+                    if msg.exited {
                         break;
                     }
 
-                    cfg = thread_msg.new_config.unwrap();
+                    if msg.new_config.is_some() {
+                        cfg = msg.new_config.unwrap();
+                    }
                 }
             }
 
+            cheat_tx.send(ThreadMsg {
+                exited: false,
+                new_config: None,
+                playerdata_array: playerdata_array,
+                average_execution_time: Some(average_execution_time)
+            }).unwrap();
+    
             last_tick = global_vars.tickcount;
-
             let end_instant = std::time::Instant::now();
             let execution_time = end_instant.duration_since(start_instant);
             average_execution_time += execution_time.as_nanos();
             average_execution_time /= 2;
+            std::thread::sleep(std::time::Duration::from_micros(100));
         }
         info!("Average execution time: {} nanoseconds", average_execution_time);
     });
 
-    // Websocket thread
-    let websocket_thread = std::thread::spawn(move || {
-        let server = TcpListener::bind("0.0.0.0:42069").expect("Bingind WebSocket");
-        for stream in server.incoming() {
-
-            let tx = socket_tx.clone();
-
-            std::thread::spawn(move || {
-                let mut websocket = tungstenite::accept(stream.unwrap()).unwrap();
-                
-                loop {
-                    let msg = websocket.read_message().unwrap();
-
-                    if !msg.is_binary() {
-                        continue;
-                    }
-
-                    let mut msg_content = msg.into_data();
-
-                    match msg_content[0] {
-                        // Sending a new configuration
-                        0x01 => {
-                            msg_content.remove(0);
-                            let new_config = core::structs::Config {
-                                    glow: msg_content[0] != 0
-                            };
-
-                            tx.send(ThreadMsg {
-                                exited: false,
-                                new_config: Some(new_config),
-                                playerdata_array: None
-                            }).expect("Sending message to cheat thread");
-                        },
-                        _ => {
-                            debug!("Unrecognized message received: {:#?}", msg_content);
-                        }
-                    }
-                }
-            });
-        }
-    });
-
+    menu::run_menu(menu_rx, menu_tx).unwrap();
     cheat_thread.join().unwrap();
-    websocket_thread.join().unwrap();
 }

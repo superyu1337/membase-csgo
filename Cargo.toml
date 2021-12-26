@@ -25,6 +25,10 @@ libm = "0.2.1"
 # For the websocket
 tungstenite = "0.14.0"
 
+# Menu
+crossterm = "0.22.1"
+tui = { version = "0.16", default-features = false, features = ['crossterm'] }
+
 # Logging
 log = "0.4.14"
 simplelog = "0.11.1"
