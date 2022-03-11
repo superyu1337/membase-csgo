@@ -10,6 +10,7 @@ pub unsafe fn setup<'a>(config: structs::Config) -> Result<structs::CheatCtx<'a>
         "qemu_procfs", &ConnectorArgs::default()
     )?;
 
+
     info!("Created connector");
 
     let mut kernel = Kernel::builder(connector)

@@ -1,3 +1,4 @@
+#[repr(C)]
 pub struct PlayerInfo {
     unknown: u64,               // 0x0000
     steam_id_64: i64,           // 0x0008 - SteamID64

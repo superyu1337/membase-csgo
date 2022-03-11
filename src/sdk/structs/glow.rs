@@ -1,4 +1,5 @@
 #[derive(Clone, Copy)]
+#[repr(C)]
 pub struct GlowObjectColor {
     pub channel_r: f32,
     pub channel_g: f32,
@@ -8,6 +9,7 @@ pub struct GlowObjectColor {
 
 unsafe impl dataview::Pod for GlowObjectColor {}
 
+#[repr(C)]
 pub struct GlowObjectOcclusion {
     pub render_when_occluded: bool,
     pub render_when_unoccluded: bool,

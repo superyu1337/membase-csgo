@@ -25,7 +25,6 @@ fn main() {
 
     let (socket_tx, cheat_rx) = std::sync::mpsc::channel();
 
-
     let cheat_thread = std::thread::spawn(move || {
         let mut last_tick = 0;
         let mut average_execution_time: u128 = 0;
@@ -45,7 +44,7 @@ fn main() {
                 let response = cheat_rx.try_recv();
 
                 if response.is_ok() {
-                    let thread_msg: ThreadMsg = response.unwrap();
+                    let thread_msg: ThreadMsg = response.expect("Sender is still alive");
 
                     if thread_msg.exited {
                         break;
@@ -67,7 +66,7 @@ fn main() {
 
     // Websocket thread
     let websocket_thread = std::thread::spawn(move || {
-        let server = TcpListener::bind("0.0.0.0:42069").expect("Bingind WebSocket");
+        let server = TcpListener::bind("0.0.0.0:42069").expect("Binding WebSocket");
         for stream in server.incoming() {
 
             let tx = socket_tx.clone();

@@ -1,4 +1,5 @@
 #[derive(Clone, Copy)]
+#[repr(C)]
 pub struct GlobalVars {
     pub realtime: f32,                          // 0x00
 	pub framecount: f32,                        // 0x04

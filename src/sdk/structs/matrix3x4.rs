@@ -1,3 +1,4 @@
+#[repr(C)]
 pub struct Matrix3x4 {
     pub row0: [f32; 4],
     pub row1: [f32; 4],
